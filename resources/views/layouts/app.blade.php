@@ -80,22 +80,25 @@
         }
         .nav.scrolled .nav-logo { color: var(--brown-deep); }
         .nav-links { display: flex; list-style: none; gap: 2rem; }
-        .nav-links a {
-            font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em;
+        .nav-links a, .nav-links .nav-btn {
+            font-family: inherit; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em;
             text-transform: uppercase; color: rgba(253,250,245,0.85);
             text-decoration: none; position: relative; transition: color 0.3s;
+            background: none; border: none; cursor: pointer; padding: 0;
+            display: flex; align-items: center; gap: 0.5rem;
         }
-        .nav-links a.active {
+        .nav-links a.active, .nav-links .nav-btn.active {
             color: var(--amber-light);
         }
-        .nav-links a::after {
+        .nav-links a::after, .nav-links .nav-btn::after {
             content: ''; position: absolute; bottom: -3px; left: 0;
             width: 0; height: 1.5px; background: var(--amber);
             transition: width 0.3s;
         }
-        .nav-links a:hover::after, .nav-links a:focus-visible::after, .nav-links a.active::after { width: 100%; }
-        .nav.scrolled .nav-links a { color: var(--brown-mid); }
-        .nav.scrolled .nav-links a.active { color: var(--amber); }
+        .nav-links a:hover::after, .nav-links a:focus-visible::after, .nav-links a.active::after,
+        .nav-links .nav-btn:hover::after, .nav-links .nav-btn:focus-visible::after { width: 100%; }
+        .nav.scrolled .nav-links a, .nav.scrolled .nav-links .nav-btn { color: var(--brown-mid); }
+        .nav.scrolled .nav-links a.active, .nav.scrolled .nav-links .nav-btn.active { color: var(--amber); }
         .nav-hamburger {
             display: none; flex-direction: column; gap: 5px;
             background: none; border: none; cursor: pointer; padding: 4px;
@@ -584,5 +587,6 @@
     </script>
 
     @stack('scripts')
+    @include('components.cart-drawer')
 </body>
 </html>
