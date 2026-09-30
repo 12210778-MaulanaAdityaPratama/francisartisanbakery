@@ -85,13 +85,17 @@
             text-transform: uppercase; color: rgba(253,250,245,0.85);
             text-decoration: none; position: relative; transition: color 0.3s;
         }
+        .nav-links a.active {
+            color: var(--amber-light);
+        }
         .nav-links a::after {
             content: ''; position: absolute; bottom: -3px; left: 0;
             width: 0; height: 1.5px; background: var(--amber);
             transition: width 0.3s;
         }
-        .nav-links a:hover::after, .nav-links a:focus-visible::after { width: 100%; }
+        .nav-links a:hover::after, .nav-links a:focus-visible::after, .nav-links a.active::after { width: 100%; }
         .nav.scrolled .nav-links a { color: var(--brown-mid); }
+        .nav.scrolled .nav-links a.active { color: var(--amber); }
         .nav-hamburger {
             display: none; flex-direction: column; gap: 5px;
             background: none; border: none; cursor: pointer; padding: 4px;
