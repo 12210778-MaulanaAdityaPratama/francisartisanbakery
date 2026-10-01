@@ -162,6 +162,16 @@
     .search-clear.visible {
         display: block;
     }
+    .search-submit {
+        border: 1px solid var(--brown-deep);
+        background: var(--brown-deep);
+        color: var(--cream);
+        padding: 0.75rem 1rem;
+        font: inherit;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
 
     /* CHIPS */
     .filter-chips-row {
@@ -189,6 +199,7 @@
         border-radius: 30px;
         cursor: pointer;
         transition: all 0.2s ease;
+        text-decoration: none;
     }
     .filter-chip:hover {
         border-color: var(--amber);
@@ -241,6 +252,13 @@
         position: absolute;
         inset: 0;
         transition: transform 0.4s ease;
+    }
+    .product-card-image {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
     .product-card:hover .product-visual-bg {
         transform: scale(1.04);
@@ -406,6 +424,17 @@
     .empty-state.visible {
         display: block;
     }
+    .catalog-pagination { display: flex; justify-content: center; margin-top: 2rem; }
+    .catalog-pagination nav { display: flex; justify-content: center; width: 100%; }
+    .catalog-pagination nav > div { display: flex; align-items: center; gap: 0.35rem; }
+    .catalog-pagination a, .catalog-pagination span[aria-current], .catalog-pagination span[aria-disabled] {
+        display: inline-flex; align-items: center; justify-content: center; min-width: 2.5rem; min-height: 2.5rem;
+        padding: 0.4rem 0.75rem; border: 1px solid var(--cream-dark); color: var(--brown-mid);
+        background: var(--white); text-decoration: none; font-size: 0.85rem;
+    }
+    .catalog-pagination a:hover, .catalog-pagination [aria-current="page"] span {
+        border-color: var(--brown-deep); background: var(--brown-deep); color: var(--cream);
+    }
     .empty-state-title {
         font-family: var(--ff-serif);
         font-size: 1.5rem;
@@ -553,335 +582,123 @@
 
             <!-- FILTER & SEARCH PANEL -->
             <div class="filter-panel">
-                <div class="search-wrapper">
+                <form class="search-wrapper" action="{{ route('menu') }}" method="GET">
                     <span class="search-icon" aria-hidden="true">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
                     </span>
-                    <input type="text" id="menu-search-input" class="search-input" placeholder="Cari nama roti atau bahan (misal: Sourdough, Croissant, Focaccia, Butter)..." aria-label="Cari menu roti">
-                    <button type="button" id="search-clear-btn" class="search-clear" aria-label="Hapus pencarian">&times;</button>
-                </div>
+                    <input type="search" name="search" id="menu-search-input" class="search-input" value="{{ $search }}" placeholder="Cari nama roti atau bahan..." aria-label="Cari menu roti">
+                    @if ($category !== '')
+                        <input type="hidden" name="category" value="{{ $category }}">
+                    @endif
+                    @if ($search !== '')
+                        <a href="{{ route('menu', ['category' => $category ?: null]) }}" class="search-clear visible" aria-label="Hapus pencarian">&times;</a>
+                    @endif
+                    <button type="submit" class="search-submit">Cari</button>
+                </form>
 
                 <div class="filter-chips-row">
                     <div class="filter-chips" role="radiogroup" aria-label="Filter kategori roti">
-                        <button class="filter-chip active" data-category="all">Semua Menu</button>
-                        <button class="filter-chip" data-category="Sourdough">Artisan Sourdough</button>
-                        <button class="filter-chip" data-category="Pastry">Viennoiserie &amp; Pastry</button>
-                        <button class="filter-chip" data-category="Savory">Savory &amp; Flatbread</button>
-                        <button class="filter-chip" data-category="Sweet">Pastry Manis</button>
-                        <button class="filter-chip" data-category="Coffee">Kopi &amp; Minuman</button>
+                        <a class="filter-chip {{ $category === '' ? 'active' : '' }}" href="{{ route('menu', ['search' => $search ?: null]) }}" @if ($category === '') aria-current="page" @endif>Semua Menu</a>
+                        @foreach ($categories as $menuCategory)
+                            <a class="filter-chip {{ $category === $menuCategory->category ? 'active' : '' }}" href="{{ route('menu', ['category' => $menuCategory->category, 'search' => $search ?: null]) }}" @if ($category === $menuCategory->category) aria-current="page" @endif>{{ $menuCategory->category_label }}</a>
+                        @endforeach
                     </div>
-                    <span class="results-count" id="results-count-text">Menampilkan 9 menu pilihan</span>
+                    <span class="results-count">Menampilkan {{ $products->firstItem() ?? 0 }}-{{ $products->lastItem() ?? 0 }} dari {{ $products->total() }} produk</span>
                 </div>
             </div>
 
             <!-- PRODUCT GRID -->
             <div class="menu-grid" id="product-grid">
+                @forelse ($products as $product)
+                    @php
+                        $visualClass = match ($product->category) {
+                            'Pastry' => 'bg-croissant',
+                            'Savory' => 'bg-focaccia',
+                            'Sweet' => 'bg-cinnamon',
+                            'Coffee' => 'bg-coffee',
+                            default => 'bg-sourdough',
+                        };
+                        $productCode = strtoupper(collect(preg_split('/\s+/', $product->name))->filter()->take(2)->map(fn (string $word): string => mb_substr($word, 0, 1))->implode(''));
+                    @endphp
+                                    <article class="product-card">
+                                        <div class="product-card-visual">
+                                            @if (filled($product->image))
+                                                <img class="product-card-image" src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" loading="lazy">
+                                            @else
+                                                <div class="product-visual-bg {{ $visualClass }}"></div>
+                                                <span class="product-code-icon">{{ $productCode }}</span>
+                                            @endif
+                                            @if (filled($product->badge_label))
+                                                <span class="product-badge-status {{ $product->is_available ? 'tag-available' : '' }}">{{ $product->badge_label }}</span>
+                                            @endif
+                                        </div>
+                                        <div class="product-card-body">
+                                            <span class="product-card-category">{{ $product->category_label }}</span>
+                                            <h2 class="product-card-name">{{ $product->name }}</h2>
+                                            <p class="product-card-desc">{{ $product->description }}</p>
+                                            @if (filled($product->specifications))
+                                                <div class="product-specs">
+                                                    @foreach ($product->specifications as $specification)
+                                                        <span class="spec-tag">{{ $specification }}</span>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="product-card-footer">
+                                            <span class="product-price">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                                            <div class="product-actions">
+                                                <button type="button" class="btn-detail" data-product="{{ $product->slug }}">Detail</button>
+                                                <a href="https://wa.me/{{ preg_replace('/\D+/', '', $product->whatsapp_number) }}?text={{ rawurlencode('Halo Francis Bakery, saya mau pesan ' . $product->name) }}" target="_blank" rel="noopener" class="btn-order-wa">Pesan WA</a>
+                                            </div>
+                                        </div>
+                                    </article>
+                                @empty
+                                    <div class="empty-state visible">
+                                        <h3 class="empty-state-title">Menu Tidak Ditemukan</h3>
+                                        <p class="empty-state-desc">Tidak ada produk yang cocok dengan pencarian atau kategori ini.</p>
+                                        <a href="{{ route('menu') }}" class="btn-detail">Tampilkan semua menu</a>
+                                    </div>
+                                @endforelse
+                            </div>
+                            <div class="catalog-pagination">{{ $products->links() }}</div>
+                        </div>
+                    </section>
 
-                <!-- 1. SOURDOUGH CLASSIC -->
-                <article class="product-card" data-category="Sourdough" data-id="sourdough" data-keywords="sourdough classic loaf asam krust tepung lokal artisan gandum starter">
-                    <div class="product-card-visual">
-                        <div class="product-visual-bg bg-sourdough"></div>
-                        <span class="product-badge-status tag-available">Tersedia Harian</span>
-                        <span class="product-code-icon">SD</span>
-                    </div>
-                    <div class="product-card-body">
-                        <span class="product-card-category">Artisan Sourdough</span>
-                        <h2 class="product-card-name">Sourdough Classic Loaf</h2>
-                        <p class="product-card-desc">
-                            Loaf andalan kami dengan kerak tebal keemasan dan sarang lebah (*open crumb*) yang lembut. Rasa asam segar seimbang dari starter ragi alami 2 tahun.
-                        </p>
-                        <div class="product-specs">
-                            <span class="spec-tag">⏱️ Fermentasi 18 Jam</span>
-                            <span class="spec-tag">⚖️ 850 gram</span>
-                            <span class="spec-tag">🌱 100% Vegan</span>
+                    <!-- BREAD CARE GUIDE SECTION -->
+                    <section class="bread-care-section" aria-label="Panduan Perawatan Roti di Rumah">
+                        <div class="bread-care-inner">
+                            <div class="care-header">
+                                <span class="section-label">Tips Dari Baker Kami</span>
+                                <h2 class="section-title">Cara Menikmati Roti <em>Di Rumah</em></h2>
+                            </div>
+                            <div class="care-cards">
+                                <div class="care-card">
+                                    <div class="care-card-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                                    </div>
+                                    <h3 class="care-card-title">1. Simpan di Suhu Ruang</h3>
+                                    <p class="care-card-text">Jangan simpan sourdough di dalam kulkas chiller karena akan cepat kering. Bungkus dalam kain katun atau kantong kertas pada suhu ruang untuk daya tahan hingga 3 hari.</p>
+                                </div>
+                                <div class="care-card">
+                                    <div class="care-card-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                    </div>
+                                    <h3 class="care-card-title">2. Bekukan untuk Tahan Lama</h3>
+                                    <p class="care-card-text">Jika ingin dinikmati minggu depan, iris roti terlebih dahulu, masukkan ke dalam wadah kedap udara, lalu simpan di freezer. Roti tahan hingga 1 bulan tanpa merusak rasa.</p>
+                                </div>
+                                <div class="care-card">
+                                    <div class="care-card-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                                    </div>
+                                    <h3 class="care-card-title">3. Panaskan Kembali (*Reheat*)</h3>
+                                    <p class="care-card-text">Semprotkan sedikit air pada permukaan kulit roti, lalu panaskan di oven 180&deg;C selama 4-6 menit atau panggang di atas wajan anti lengket. Kerak akan kembali renyah sempurna.</p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="product-card-footer">
-                        <span class="product-price">Rp 75.000</span>
-                        <div class="product-actions">
-                            <button type="button" class="btn-detail" onclick="openProductModal('sourdough')">Detail</button>
-                            <a href="https://wa.me/6281234567890?text=Halo%20Francis%20Bakery,%20saya%20mau%20pesan%20Sourdough%20Classic%20Loaf" target="_blank" rel="noopener" class="btn-order-wa">Pesan WA</a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- 2. CROISSANT BUTTER -->
-                <article class="product-card" data-category="Pastry" data-id="croissant" data-keywords="croissant butter prancis viennoiserie pastry mentega renyah layer">
-                    <div class="product-card-visual">
-                        <div class="product-visual-bg bg-croissant"></div>
-                        <span class="product-badge-status tag-available">Best Seller</span>
-                        <span class="product-code-icon">CR</span>
-                    </div>
-                    <div class="product-card-body">
-                        <span class="product-card-category">Viennoiserie</span>
-                        <h2 class="product-card-name">Croissant Butter Prancis</h2>
-                        <p class="product-card-desc">
-                            Dibuat dengan teknik pelipatan tradisional 27 lapis menggunakan mentega AOP Prancis berlemak tinggi. Sangat renyah di luar, harum mentega lembut di dalam.
-                        </p>
-                        <div class="product-specs">
-                            <span class="spec-tag">🧈 French AOP Butter</span>
-                            <span class="spec-tag">🥐 27 Lapisan</span>
-                            <span class="spec-tag">⚖️ 100 gram</span>
-                        </div>
-                    </div>
-                    <div class="product-card-footer">
-                        <span class="product-price">Rp 35.000</span>
-                        <div class="product-actions">
-                            <button type="button" class="btn-detail" onclick="openProductModal('croissant')">Detail</button>
-                            <a href="https://wa.me/6281234567890?text=Halo%20Francis%20Bakery,%20saya%20mau%20pesan%20Croissant%20Butter" target="_blank" rel="noopener" class="btn-order-wa">Pesan WA</a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- 3. RYE DARK LOAF -->
-                <article class="product-card" data-category="Sourdough" data-id="rye" data-keywords="rye dark loaf gandum hitam jerman asam padat serat tinggi healthy diet">
-                    <div class="product-card-visual">
-                        <div class="product-visual-bg bg-rye"></div>
-                        <span class="product-badge-status tag-available">High Fiber</span>
-                        <span class="product-code-icon">RY</span>
-                    </div>
-                    <div class="product-card-body">
-                        <span class="product-card-category">Whole Grain Sourdough</span>
-                        <h2 class="product-card-name">Dark Rye Loaf 70%</h2>
-                        <p class="product-card-desc">
-                            Menggunakan 70% tepung gandum hitam utuh (*whole rye*). Tekstur padat lembab dengan karakter rasa asam bumi yang pekat. Sangat nikmat dengan keju atau smoked beef.
-                        </p>
-                        <div class="product-specs">
-                            <span class="spec-tag">🌾 70% Dark Rye</span>
-                            <span class="spec-tag">⏱️ Fermentasi 24 Jam</span>
-                            <span class="spec-tag">⚖️ 750 gram</span>
-                        </div>
-                    </div>
-                    <div class="product-card-footer">
-                        <span class="product-price">Rp 85.000</span>
-                        <div class="product-actions">
-                            <button type="button" class="btn-detail" onclick="openProductModal('rye')">Detail</button>
-                            <a href="https://wa.me/6281234567890?text=Halo%20Francis%20Bakery,%20saya%20mau%20pesan%20Dark%20Rye%20Loaf" target="_blank" rel="noopener" class="btn-order-wa">Pesan WA</a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- 4. FOCACCIA ROSEMARY -->
-                <article class="product-card" data-category="Savory" data-id="focaccia" data-keywords="focaccia rosemary olive oil zaitun fleur de sel flatbread savory italia">
-                    <div class="product-card-visual">
-                        <div class="product-visual-bg bg-focaccia"></div>
-                        <span class="product-badge-status tag-available">Fresh Batch</span>
-                        <span class="product-code-icon">FC</span>
-                    </div>
-                    <div class="product-card-body">
-                        <span class="product-card-category">Savory Flatbread</span>
-                        <h2 class="product-card-name">Focaccia Rosemary &amp; Olive Oil</h2>
-                        <p class="product-card-desc">
-                            Adonan lembut kaya gelembung udara, dimarinasi minyak zaitun extra virgin, daun rosemary segar dari kebun, serta taburan garam laut fleur de sel renyah.
-                        </p>
-                        <div class="product-specs">
-                            <span class="spec-tag">🫒 Extra Virgin Olive Oil</span>
-                            <span class="spec-tag">🌿 Fresh Rosemary</span>
-                            <span class="spec-tag">⚖️ Slice 15x15 cm</span>
-                        </div>
-                    </div>
-                    <div class="product-card-footer">
-                        <span class="product-price">Rp 40.000</span>
-                        <div class="product-actions">
-                            <button type="button" class="btn-detail" onclick="openProductModal('focaccia')">Detail</button>
-                            <a href="https://wa.me/6281234567890?text=Halo%20Francis%20Bakery,%20saya%20mau%20pesan%20Focaccia%20Rosemary" target="_blank" rel="noopener" class="btn-order-wa">Pesan WA</a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- 5. CINNAMON ROLL -->
-                <article class="product-card" data-category="Sweet" data-id="cinnamon" data-keywords="cinnamon roll kayu manis sumatra gula aren glazed pastry manis gula">
-                    <div class="product-card-visual">
-                        <div class="product-visual-bg bg-cinnamon"></div>
-                        <span class="product-badge-status tag-available">Favorit Sarapan</span>
-                        <span class="product-code-icon">CN</span>
-                    </div>
-                    <div class="product-card-body">
-                        <span class="product-card-category">Pastry Manis</span>
-                        <h2 class="product-card-name">Cinnamon Roll Sumatra</h2>
-                        <p class="product-card-desc">
-                            Menggunakan kayu manis Cassia pilihan dari Sumatra Barat beraroma harum pekat, disapukan dengan gula aren organik dan glasur susu murni tipis yang tidak berlebihan.
-                        </p>
-                        <div class="product-specs">
-                            <span class="spec-tag">🪵 Sumatra Cassia</span>
-                            <span class="spec-tag">🥛 Pure Milk Glaze</span>
-                            <span class="spec-tag">⚖️ 140 gram</span>
-                        </div>
-                    </div>
-                    <div class="product-card-footer">
-                        <span class="product-price">Rp 42.000</span>
-                        <div class="product-actions">
-                            <button type="button" class="btn-detail" onclick="openProductModal('cinnamon')">Detail</button>
-                            <a href="https://wa.me/6281234567890?text=Halo%20Francis%20Bakery,%20saya%20mau%20pesan%20Cinnamon%20Roll" target="_blank" rel="noopener" class="btn-order-wa">Pesan WA</a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- 6. PAIN AU CHOCOLAT -->
-                <article class="product-card" data-category="Pastry" data-id="pain-au-chocolat" data-keywords="pain au chocolat cokelat prancis valrhona viennoiserie pastry choco croissant">
-                    <div class="product-card-visual">
-                        <div class="product-visual-bg bg-pain"></div>
-                        <span class="product-badge-status tag-available">Tersedia Harian</span>
-                        <span class="product-code-icon">PC</span>
-                    </div>
-                    <div class="product-card-body">
-                        <span class="product-card-category">Viennoiserie</span>
-                        <h2 class="product-card-name">Pain au Chocolat 58%</h2>
-                        <p class="product-card-desc">
-                            Dua batang cokelat dark couverture 58% yang meleleh lembut di tengah adonan croissant berlapis mentega Prancis. Teman sempurna untuk kopi pagi.
-                        </p>
-                        <div class="product-specs">
-                            <span class="spec-tag">🍫 Dark Couverture 58%</span>
-                            <span class="spec-tag">🧈 French Butter</span>
-                            <span class="spec-tag">⚖️ 110 gram</span>
-                        </div>
-                    </div>
-                    <div class="product-card-footer">
-                        <span class="product-price">Rp 38.000</span>
-                        <div class="product-actions">
-                            <button type="button" class="btn-detail" onclick="openProductModal('pain-au-chocolat')">Detail</button>
-                            <a href="https://wa.me/6281234567890?text=Halo%20Francis%20Bakery,%20saya%20mau%20pesan%20Pain%20au%20Chocolat" target="_blank" rel="noopener" class="btn-order-wa">Pesan WA</a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- 7. ALMOND CROISSANT -->
-                <article class="product-card" data-category="Sweet" data-id="almond-croissant" data-keywords="almond croissant frangipane kacang almond tabur gula bubuk viennoiserie double baked">
-                    <div class="product-card-visual">
-                        <div class="product-visual-bg bg-almond"></div>
-                        <span class="product-badge-status tag-available">Double Baked</span>
-                        <span class="product-code-icon">AC</span>
-                    </div>
-                    <div class="product-card-body">
-                        <span class="product-card-category">Pastry Manis</span>
-                        <h2 class="product-card-name">Almond Frangipane Croissant</h2>
-                        <p class="product-card-desc">
-                            Croissant mentega yang dipanggang ulang dengan krim almond (*frangipane*) buatan sendiri, ditaburi irisan kacang almond panggang dan sedikit gula salju halus.
-                        </p>
-                        <div class="product-specs">
-                            <span class="spec-tag">🌰 Homemade Frangipane</span>
-                            <span class="spec-tag">🔥 Double Baked</span>
-                            <span class="spec-tag">⚖️ 150 gram</span>
-                        </div>
-                    </div>
-                    <div class="product-card-footer">
-                        <span class="product-price">Rp 48.000</span>
-                        <div class="product-actions">
-                            <button type="button" class="btn-detail" onclick="openProductModal('almond-croissant')">Detail</button>
-                            <a href="https://wa.me/6281234567890?text=Halo%20Francis%20Bakery,%20saya%20mau%20pesan%20Almond%20Croissant" target="_blank" rel="noopener" class="btn-order-wa">Pesan WA</a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- 8. TRADITIONAL BAGUETTE -->
-                <article class="product-card" data-category="Sourdough" data-id="baguette" data-keywords="baguette prancis tradisional panjang roti kerak keras sandwich levan">
-                    <div class="product-card-visual">
-                        <div class="product-visual-bg bg-baguette"></div>
-                        <span class="product-badge-status tag-available">Tersedia Harian</span>
-                        <span class="product-code-icon">BG</span>
-                    </div>
-                    <div class="product-card-body">
-                        <span class="product-card-category">Artisan Bread</span>
-                        <h2 class="product-card-name">Baguette Traditionnelle</h2>
-                        <p class="product-card-desc">
-                            Roti tongkat khas Prancis dengan kerak luar yang garing berderak dan remah dalam yang kenyal dan sarang lebah. Sangat cocok dijadikan garlic bread atau sandwich.
-                        </p>
-                        <div class="product-specs">
-                            <span class="spec-tag">⏱️ Fermentasi 16 Jam</span>
-                            <span class="spec-tag">📏 Panjang 55 cm</span>
-                            <span class="spec-tag">⚖️ 350 gram</span>
-                        </div>
-                    </div>
-                    <div class="product-card-footer">
-                        <span class="product-price">Rp 38.000</span>
-                        <div class="product-actions">
-                            <button type="button" class="btn-detail" onclick="openProductModal('baguette')">Detail</button>
-                            <a href="https://wa.me/6281234567890?text=Halo%20Francis%20Bakery,%20saya%20mau%20pesan%20Baguette%20Traditionnelle" target="_blank" rel="noopener" class="btn-order-wa">Pesan WA</a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- 9. ARTISAN COLD BREW -->
-                <article class="product-card" data-category="Coffee" data-id="cold-brew" data-keywords="kopi cold brew arabika gayo artisan drink minuman botol">
-                    <div class="product-card-visual">
-                        <div class="product-visual-bg bg-coffee"></div>
-                        <span class="product-badge-status tag-available">Fresh Brewed</span>
-                        <span class="product-code-icon">CB</span>
-                    </div>
-                    <div class="product-card-body">
-                        <span class="product-card-category">Minuman Pendamping</span>
-                        <h2 class="product-card-name">Signature Cold Brew Black</h2>
-                        <p class="product-card-desc">
-                            Kopi Arabika Aceh Gayo pilihan yang diseduh dingin perlahan selama 16 jam. Rasa manis alami berry dan cokelat tanpa gula tambahan, pendamping terbaik roti sourdough.
-                        </p>
-                        <div class="product-specs">
-                            <span class="spec-tag">☕ 100% Single Origin Gayo</span>
-                            <span class="spec-tag">⏱️ 16-Hour Cold Steep</span>
-                            <span class="spec-tag">🧴 Botol Kaca 250ml</span>
-                        </div>
-                    </div>
-                    <div class="product-card-footer">
-                        <span class="product-price">Rp 38.000</span>
-                        <div class="product-actions">
-                            <button type="button" class="btn-detail" onclick="openProductModal('cold-brew')">Detail</button>
-                            <a href="https://wa.me/6281234567890?text=Halo%20Francis%20Bakery,%20saya%20mau%20pesan%20Signature%20Cold%20Brew" target="_blank" rel="noopener" class="btn-order-wa">Pesan WA</a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- EMPTY STATE JIKA TIDAK ADA HASIL -->
-                <div class="empty-state" id="empty-state">
-                    <h3 class="empty-state-title">Menu Tidak Ditemukan</h3>
-                    <p class="empty-state-desc">Kami tidak menemukan menu yang sesuai dengan kata kunci pencarian Anda. Coba gunakan kata kunci lain atau pilih tab "Semua Menu".</p>
-                    <button type="button" class="btn-detail" onclick="resetSearchAndFilter()">Reset Pencarian</button>
-                </div>
-
-            </div>
-
-        </div>
-    </section>
-
-    <!-- BREAD CARE GUIDE SECTION -->
-    <section class="bread-care-section" aria-label="Panduan Perawatan Roti di Rumah">
-        <div class="bread-care-inner">
-            <div class="care-header">
-                <span class="section-label">Tips Dari Baker Kami</span>
-                <h2 class="section-title">Cara Menikmati Roti <em>Di Rumah</em></h2>
-            </div>
-            <div class="care-cards">
-                <div class="care-card">
-                    <div class="care-card-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                    </div>
-                    <h3 class="care-card-title">1. Simpan di Suhu Ruang</h3>
-                    <p class="care-card-text">
-                        Jangan simpan sourdough di dalam kulkas chiller karena akan cepat kering. Bungkus dalam kain katun atau kantong kertas pada suhu ruang untuk daya tahan hingga 3 hari.
-                    </p>
-                </div>
-                <div class="care-card">
-                    <div class="care-card-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                    </div>
-                    <h3 class="care-card-title">2. Bekukan untuk Tahan Lama</h3>
-                    <p class="care-card-text">
-                        Jika ingin dinikmati minggu depan, iris roti terlebih dahulu, masukkan ke dalam wadah kedap udara, lalu simpan di freezer. Roti tahan hingga 1 bulan tanpa merusak rasa.
-                    </p>
-                </div>
-                <div class="care-card">
-                    <div class="care-card-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
-                    </div>
-                    <h3 class="care-card-title">3. Panaskan Kembali (*Reheat*)</h3>
-                    <p class="care-card-text">
-                        Semprotkan sedikit air pada permukaan kulit roti, lalu panaskan di oven 180&deg;C selama 4–6 menit atau panggang di atas wajan anti lengket. Kerak akan kembali renyah sempurna!
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
+                    </section>
 
     <!-- PRODUCT DETAIL MODAL -->
     <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-product-name">
@@ -1011,6 +828,8 @@
         }
     };
 
+    menuDetails = @js($menuDetails);
+
     // MODAL CONTROL
     var modalOverlay = document.getElementById('modal-overlay');
     var modalClose = document.getElementById('modal-close');
@@ -1022,14 +841,14 @@
         document.getElementById('modal-product-name').textContent = p.name;
         document.getElementById('modal-product-desc').textContent = p.desc;
         document.getElementById('modal-product-price').textContent = p.price;
-        
+
         var detailsEl = document.getElementById('modal-product-details');
-        detailsEl.innerHTML = p.details.map(function(d) {
+        detailsEl.innerHTML = (p.details || []).map(function(d) {
             return '<div class="modal-detail-item"><p class="modal-detail-label">' + d.label + '</p><p class="modal-detail-value">' + d.value + '</p></div>';
         }).join('');
 
         var ctaEl = document.getElementById('modal-order-cta');
-        ctaEl.href = 'https://wa.me/6281234567890?text=Halo%20Francis%20Artisan%20Bakery,%20saya%20mau%20pesan%20' + encodeURIComponent(p.name);
+        ctaEl.href = 'https://wa.me/' + p.whatsapp_number + '?text=' + encodeURIComponent('Halo Francis Artisan Bakery, saya mau pesan ' + p.name);
 
         modalOverlay.classList.add('open');
         modalClose.focus();
@@ -1041,6 +860,12 @@
         document.body.style.overflow = '';
     }
 
+    document.querySelectorAll('[data-product]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            openProductModal(button.dataset.product);
+        });
+    });
+
     modalClose.addEventListener('click', closeProductModal);
     modalOverlay.addEventListener('click', function(e) {
         if (e.target === modalOverlay) closeProductModal();
@@ -1049,76 +874,5 @@
         if (e.key === 'Escape' && modalOverlay.classList.contains('open')) closeProductModal();
     });
 
-    // SEARCH & FILTER LOGIC
-    var searchInput = document.getElementById('menu-search-input');
-    var clearBtn = document.getElementById('search-clear-btn');
-    var filterChips = document.querySelectorAll('.filter-chip');
-    var resultsText = document.getElementById('results-count-text');
-    var emptyState = document.getElementById('empty-state');
-
-    var currentCategory = 'all';
-    var currentQuery = '';
-
-    function filterMenu() {
-        var visibleCount = 0;
-        var cards = document.querySelectorAll('.product-card');
-
-        cards.forEach(function(card) {
-            var cat = card.getAttribute('data-category');
-            var keywords = (card.getAttribute('data-keywords') || '') + ' ' + card.innerText.toLowerCase();
-
-            var matchCat = (currentCategory === 'all' || cat === currentCategory);
-            var matchQuery = (!currentQuery || keywords.indexOf(currentQuery.toLowerCase()) !== -1);
-
-            if (matchCat && matchQuery) {
-                card.style.display = 'flex';
-                visibleCount++;
-            } else {
-                card.style.display = 'none';
-            }
-        });
-
-        resultsText.textContent = 'Menampilkan ' + visibleCount + ' menu pilihan';
-
-        if (visibleCount === 0) {
-            emptyState.classList.add('visible');
-        } else {
-            emptyState.classList.remove('visible');
-        }
-    }
-
-    searchInput.addEventListener('input', function() {
-        currentQuery = this.value.trim();
-        clearBtn.classList.toggle('visible', currentQuery.length > 0);
-        filterMenu();
-    });
-
-    clearBtn.addEventListener('click', function() {
-        searchInput.value = '';
-        currentQuery = '';
-        this.classList.remove('visible');
-        filterMenu();
-        searchInput.focus();
-    });
-
-    filterChips.forEach(function(chip) {
-        chip.addEventListener('click', function() {
-            filterChips.forEach(function(c) { c.classList.remove('active'); });
-            this.classList.add('active');
-            currentCategory = this.getAttribute('data-category');
-            filterMenu();
-        });
-    });
-
-    function resetSearchAndFilter() {
-        searchInput.value = '';
-        currentQuery = '';
-        clearBtn.classList.remove('visible');
-        currentCategory = 'all';
-        filterChips.forEach(function(c) {
-            c.classList.toggle('active', c.getAttribute('data-category') === 'all');
-        });
-        filterMenu();
-    }
 </script>
 @endpush

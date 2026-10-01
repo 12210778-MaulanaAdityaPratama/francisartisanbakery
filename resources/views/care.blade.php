@@ -5,24 +5,24 @@
 @push('styles')
 <style>
     .care-hero {
-        background: var(--white);
+        background: var(--brown-deep);
         padding: 9rem 2rem 4.5rem;
         text-align: center;
-        border-bottom: 1px solid var(--cream-dark);
+        border-bottom: 1px solid rgba(200, 134, 10, 0.25);
     }
     .care-title {
         font-family: var(--ff-serif);
         font-size: clamp(3rem, 6vw, 4.5rem);
-        color: var(--brown-deep);
+        color: var(--cream);
         margin-bottom: 1rem;
     }
     .care-title em {
-        color: var(--amber);
+        color: var(--amber-light);
         font-style: italic;
     }
     .care-subtitle {
         font-size: 1.15rem;
-        color: var(--brown-mid);
+        color: rgba(245, 236, 215, 0.7);
         max-width: 600px;
         margin: 0 auto;
         line-height: 1.8;

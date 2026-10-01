@@ -16,3 +16,4 @@ Route::get('/menu/{slug}', [\App\Http\Controllers\ProductController::class, 'sho
 Route::get('/hampers', [\App\Http\Controllers\HampersController::class, 'index'])->name('hampers');
 Route::get('/care', [\App\Http\Controllers\CareController::class, 'index'])->name('care');
 Route::get('/wholesale', [\App\Http\Controllers\WholesaleController::class, 'index'])->name('wholesale');
+Route::get('/career', [\App\Http\Controllers\CareerController::class, 'index'])->name('career');

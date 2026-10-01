@@ -9,6 +9,8 @@
         <li><a href="{{ url('/hampers') }}" id="nav-hampers" class="{{ request()->is('hampers') ? 'active' : '' }}">Hampers</a></li>
         <li><a href="{{ url('/wholesale') }}" id="nav-wholesale" class="{{ request()->is('wholesale') ? 'active' : '' }}">Wholesale</a></li>
         <li><a href="{{ url('/about') }}" id="nav-about" class="{{ request()->is('about') ? 'active' : '' }}">Tentang Kami</a></li>
+        <li><a href="{{ url('/care') }}" id="nav-care" class="{{ request()->is('care') ? 'active' : '' }}">Bread Care</a></li>
+        <li><a href="{{ url('/career') }}" id="nav-career" class="{{ request()->is('career') ? 'active' : '' }}">Career</a></li>
         <li>
             <button class="nav-btn" onclick="window.openCart && window.openCart()" aria-label="Buka Keranjang">
                 🛒 Cart
@@ -27,5 +29,7 @@
     <a href="{{ url('/menu') }}" class="mobile-nav-link" id="mobile-nav-menu">Menu</a>
     <a href="{{ url('/store') }}" class="mobile-nav-link" id="mobile-nav-store">Store</a>
     <a href="{{ url('/about') }}" class="mobile-nav-link" id="mobile-nav-about">Tentang Kami</a>
+    <a href="{{ url('/care') }}" class="mobile-nav-link" id="mobile-nav-care">Bread Care</a>
+    <a href="{{ url('/career') }}" class="mobile-nav-link" id="mobile-nav-career">Career</a>
 </div>
 

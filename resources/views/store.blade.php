@@ -237,6 +237,14 @@
         border-color: var(--amber);
         box-shadow: 0 8px 24px rgba(44, 26, 14, 0.07);
     }
+    .store-card-photo {
+        display: block;
+        width: 100%;
+        height: 190px;
+        margin-bottom: 1.25rem;
+        object-fit: cover;
+        border-radius: 3px;
+    }
     .store-card.selected {
         border-color: var(--amber);
         border-left: 5px solid var(--amber);
@@ -684,7 +692,7 @@
             </p>
             <div class="store-stats-row">
                 <div class="store-stat-item">
-                    <span class="store-stat-val">6 Gerai</span>
+                    <span class="store-stat-val">{{ $stores->count() }} Gerai</span>
                     <span class="store-stat-label">Jabodetabek</span>
                 </div>
                 <div class="store-stat-item">
@@ -718,29 +726,73 @@
 
                 <div class="filter-chips-row">
                     <div class="filter-chips" role="radiogroup" aria-label="Filter berdasarkan area">
-                        <button class="filter-chip active" data-area="all">Semua Area</button>
-                        <button class="filter-chip" data-area="Jakarta Utara">Jakarta Utara (2)</button>
-                        <button class="filter-chip" data-area="Jakarta Selatan">Jakarta Selatan (1)</button>
-                        <button class="filter-chip" data-area="Jakarta Pusat">Jakarta Pusat (1)</button>
-                        <button class="filter-chip" data-area="Jakarta Barat">Jakarta Barat (1)</button>
-                        <button class="filter-chip" data-area="Tangerang">Tangerang &amp; BSD (1)</button>
+                        <button class="filter-chip active" data-area="all">Semua Area ({{ $stores->count() }})</button>
+                        @foreach ($areas as $area => $count)
+                            <button class="filter-chip" data-area="{{ $area }}">{{ $area === 'Tangerang' ? 'Tangerang & BSD' : $area }} ({{ $count }})</button>
+                        @endforeach
                     </div>
-                    <span class="results-count" id="results-count-text">Menampilkan 6 lokasi gerai</span>
+                    <span class="results-count" id="results-count-text">Menampilkan {{ $stores->count() }} lokasi gerai</span>
                 </div>
             </div>
 
             <!-- MOBILE TOGGLE LIST / MAP -->
             <div class="mobile-locator-toggle" id="mobile-toggle">
-                <button type="button" class="mobile-tab-btn active" id="btn-toggle-list">Daftar Toko (<span id="mobile-list-count">6</span>)</button>
+                <button type="button" class="mobile-tab-btn active" id="btn-toggle-list">Daftar Toko (<span id="mobile-list-count">{{ $stores->count() }}</span>)</button>
                 <button type="button" class="mobile-tab-btn" id="btn-toggle-map">Peta Interaktif</button>
             </div>
 
             <!-- GRID LOCATOR -->
             <div class="locator-grid" id="locator-grid">
-                
+
                 <!-- LEFT COLUMN: STORE CARDS -->
                 <div class="stores-list" id="stores-list-container">
-                    
+                    @forelse ($stores as $store)
+                        <article class="store-card {{ $store->is_flagship ? 'selected' : '' }}" id="card-{{ $store->slug }}" data-id="{{ $store->slug }}" data-area="{{ $store->area }}" data-keywords="{{ $store->keywords }}">
+                            @if (filled($store->image))
+                                <img class="store-card-photo" src="{{ asset('storage/' . $store->image) }}" alt="Foto {{ $store->name }}" loading="lazy">
+                            @endif
+                            <div class="store-card-header">
+                                <div>
+                                    <span class="store-area-tag">{{ $store->area }}</span>
+                                    <h2 class="store-title">{{ $store->name }}</h2>
+                                </div>
+                                <span class="store-type-badge {{ $store->is_flagship ? 'flagship' : '' }}">{{ $store->type_label }}</span>
+                            </div>
+                            <p class="store-address">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                <span>{{ $store->address }}</span>
+                            </p>
+                            <div class="store-info-row">
+                                <div class="store-info-col">
+                                    <span class="store-info-label">Jam Operasional</span>
+                                    <span class="store-info-val">{{ $store->operating_hours }}</span>
+                                </div>
+                                <div class="store-info-col">
+                                    <span class="store-info-label">Telepon / WhatsApp</span>
+                                    <span class="store-info-val">{{ $store->phone }}</span>
+                                </div>
+                            </div>
+                            @if (filled($store->facilities))
+                                <div class="store-facilities">
+                                    @foreach ($store->facilities as $facility)
+                                        <span class="facility-pill">{{ $facility }}</span>
+                                    @endforeach
+                                </div>
+                            @endif
+                            <div class="store-actions">
+                                <a href="{{ $store->maps_url }}" target="_blank" rel="noopener" class="btn-maps">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
+                                    Buka di Google Maps
+                                </a>
+                                <a href="https://wa.me/{{ $store->whatsapp_number }}?text={{ rawurlencode('Halo ' . $store->name . ', saya ingin bertanya tentang gerai hari ini') }}" target="_blank" rel="noopener" class="btn-wa">WhatsApp Outlet</a>
+                                <button type="button" class="btn-focus-map" onclick="selectStore('{{ $store->slug }}', true)">Lihat di Peta</button>
+                            </div>
+                        </article>
+                    @empty
+                    {{--
                     <!-- 1. SUNTER (FLAGSHIP) -->
                     <article class="store-card selected" id="card-sunter" data-id="sunter" data-area="Jakarta Utara" data-keywords="sunter tanjung priok jakarta utara nusantara flagship central kitchen head office">
                         <div class="store-card-header">
@@ -1006,8 +1058,11 @@
                         </div>
                     </article>
 
+                    --}}
+                    @endforelse
+
                     <!-- EMPTY STATE WHEN FILTER YIELDS NO RESULTS -->
-                    <div class="empty-state" id="empty-state">
+                    <div class="empty-state {{ $stores->isEmpty() ? 'visible' : '' }}" id="empty-state">
                         <h3 class="empty-state-title">Gerai Tidak Ditemukan</h3>
                         <p class="empty-state-desc">Kami tidak menemukan gerai yang cocok dengan kata kunci pencarian Anda. Coba kata kunci lain atau pilih filter "Semua Area".</p>
                         <button type="button" class="btn-maps" onclick="resetSearchAndFilter()">Reset Pencarian</button>
@@ -1074,69 +1129,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <script>
-    // DATA STORE COORDINATES & DETAILS
-    var storesData = {
-        sunter: {
-            id: 'sunter',
-            name: 'Francis Sunter (Central Bakehouse)',
-            type: 'Flagship Store',
-            area: 'Jakarta Utara',
-            address: 'Jl. Nusantara Timur 10 Blok D No. 47, Sunter Agung, Jakarta Utara',
-            coords: [-6.13845, 106.86210],
-            hours: '06.00 – 20.00 WIB',
-            wa: '+62 812-3456-7890'
-        },
-        senopati: {
-            id: 'senopati',
-            name: 'Francis Senopati — Bakery & Cafe',
-            type: 'Dine-in Cafe',
-            area: 'Jakarta Selatan',
-            address: 'Jl. Senopati No. 42, Kebayoran Baru, Jakarta Selatan',
-            coords: [-6.23450, 106.81120],
-            hours: '07.00 – 21.00 WIB',
-            wa: '+62 813-8888-2301'
-        },
-        gi: {
-            id: 'gi',
-            name: 'Francis Grand Indonesia',
-            type: 'Mall Boutique',
-            area: 'Jakarta Pusat',
-            address: 'East Mall LG Floor #18, Jl. M.H. Thamrin No. 1, Jakarta Pusat',
-            coords: [-6.19500, 106.82100],
-            hours: '10.00 – 22.00 WIB',
-            wa: '+62 813-8888-2302'
-        },
-        mkg: {
-            id: 'mkg',
-            name: 'Francis Mall Kelapa Gading 3',
-            type: 'Viennoiserie Bar',
-            area: 'Jakarta Utara',
-            address: 'Mall Kelapa Gading 3, GF #G-08, Kelapa Gading, Jakarta Utara',
-            coords: [-6.15780, 106.90800],
-            hours: '10.00 – 22.00 WIB',
-            wa: '+62 813-8888-2303'
-        },
-        puri: {
-            id: 'puri',
-            name: 'Francis Lippo Mall Puri',
-            type: 'Fresh Oven Corner',
-            area: 'Jakarta Barat',
-            address: 'Lippo Mall Puri, LG Floor, Kembangan, Jakarta Barat',
-            coords: [-6.18660, 106.73600],
-            hours: '10.00 – 22.00 WIB',
-            wa: '+62 813-8888-2304'
-        },
-        bsd: {
-            id: 'bsd',
-            name: 'Francis The Breeze BSD',
-            type: 'Garden Cafe',
-            area: 'Tangerang',
-            address: 'The Breeze BSD City, GF Unit L-15, BSD, Tangerang',
-            coords: [-6.30150, 106.65340],
-            hours: '07.30 – 21.00 WIB',
-            wa: '+62 813-8888-2305'
-        }
-    };
+    var storesData = @js($storesData);
 
     // INITIALIZE LEAFLET MAP
     var defaultCenter = [-6.2000, 106.8000];
@@ -1170,16 +1163,21 @@
 
     var markers = {};
     var bounds = L.latLngBounds([]);
+    var escapePopupValue = function(value) {
+        var element = document.createElement('span');
+        element.textContent = String(value ?? '');
+        return element.innerHTML;
+    };
 
     // Populate Markers
     Object.keys(storesData).forEach(function(key) {
         var s = storesData[key];
-        var marker = L.marker(s.coords, { icon: createCustomIcon(key === 'sunter') }).addTo(map);
-        
-        var popupHtml = '<div class="popup-store-name">' + s.name + '</div>' +
-                        '<div class="popup-store-sub">' + s.type + ' &bull; ' + s.area + '</div>' +
-                        '<div class="popup-store-desc">' + s.address + '<br><strong>Jam:</strong> ' + s.hours + '</div>' +
-                        '<a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(s.address) + '" target="_blank" class="popup-store-link">Petunjuk Arah &rsaquo;</a>';
+        var marker = L.marker(s.coords, { icon: createCustomIcon(s.isFlagship) }).addTo(map);
+
+        var popupHtml = '<div class="popup-store-name">' + escapePopupValue(s.name) + '</div>' +
+                '<div class="popup-store-sub">' + escapePopupValue(s.type) + ' &bull; ' + escapePopupValue(s.area) + '</div>' +
+                '<div class="popup-store-desc">' + escapePopupValue(s.address) + '<br><strong>Jam:</strong> ' + escapePopupValue(s.hours) + '</div>' +
+                '<a href="' + escapePopupValue(s.mapsUrl) + '" target="_blank" rel="noopener" class="popup-store-link">Petunjuk Arah &rsaquo;</a>';
         marker.bindPopup(popupHtml);
 
         marker.on('click', function() {
@@ -1191,10 +1189,14 @@
     });
 
     // Fit map to show all markers
-    map.fitBounds(bounds, { padding: [50, 50] });
+    if (bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [50, 50] });
+    }
 
     function resetMapView() {
-        map.fitBounds(bounds, { padding: [50, 50] });
+        if (bounds.isValid()) {
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
     }
 
     // SELECT STORE (SYNCHRONIZE CARD & MAP)
@@ -1252,7 +1254,7 @@
         cards.forEach(function(card) {
             var cardArea = card.getAttribute('data-area');
             var cardKeywords = (card.getAttribute('data-keywords') || '') + ' ' + card.innerText.toLowerCase();
-            
+
             var matchArea = (currentArea === 'all' || cardArea === currentArea);
             var matchQuery = (!currentQuery || cardKeywords.indexOf(currentQuery.toLowerCase()) !== -1);
 

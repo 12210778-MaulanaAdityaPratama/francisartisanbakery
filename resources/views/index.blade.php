@@ -3,19 +3,26 @@
 @section('title', 'Francis Artisan Bakery')
 
 @section('content')
+    @php
+        $heroTitleLines = array_pad(preg_split('/\r\n|\r|\n/', $home['hero']['title'], 2), 2, null);
+        $dailyTitleLines = array_pad(preg_split('/\r\n|\r|\n/', $home['daily']['title'], 2), 2, null);
+        $orderTitleLines = array_pad(preg_split('/\r\n|\r|\n/', $home['order_section']['title'], 2), 2, null);
+        $menuCardSizes = ['large', 'medium', 'small', 'wide', 'slim'];
+        $whatsappNumber = preg_replace('/\D+/', '', $home['order_section']['whatsapp']);
+    @endphp
+
     <!-- HERO -->
     <section class="hero" id="beranda" aria-label="Hero section">
         <div class="hero-left">
-            <p class="hero-eyebrow" id="hero-eyebrow-date">Artisan Bakery, Jakarta</p>
+            <p class="hero-eyebrow" id="hero-eyebrow-date" data-base-label="{{ $home['hero']['eyebrow'] }}">{{ $home['hero']['eyebrow'] }}</p>
             <h1 class="hero-headline">
-                Dibuat Tangan,<br>
-                <em>Setiap Pagi.</em>
+                {{ $heroTitleLines[0] }}
+                @if (filled($heroTitleLines[1]))
+                    <br><em>{{ $heroTitleLines[1] }}</em>
+                @endif
             </h1>
-            <p class="hero-desc">
-                Roti kami keluar dari oven pukul 05.30. Dibuat dari tepung lokal, air, garam, dan waktu.
-                Tidak ada pengawet. Tidak ada kompromi.
-            </p>
-            <a href="#menu" class="hero-cta" id="hero-cta">Lihat Menu Hari Ini</a>
+            <p class="hero-desc">{{ $home['hero']['description'] }}</p>
+            <a href="{{ $home['hero']['cta_url'] }}" class="hero-cta" id="hero-cta">{{ $home['hero']['cta_label'] }}</a>
         </div>
 
         <div class="hero-right" aria-hidden="true">
@@ -32,8 +39,8 @@
                 </div>
             </div>
             <div class="hero-detail">
-                <span class="hero-detail-label">Mulai dari</span>
-                <span class="hero-detail-value">Rp 35.000</span>
+                <span class="hero-detail-label">{{ $home['hero']['price_label'] }}</span>
+                <span class="hero-detail-value">{{ $home['hero']['price_value'] }}</span>
             </div>
         </div>
         <div class="hero-divider" aria-hidden="true"></div>
@@ -42,112 +49,61 @@
     <!-- SECTION: HARI INI -->
     <section class="section-daily" id="harian" aria-label="Produk hari ini">
         <div class="daily-left">
-            <span class="section-label">Selalu Segar</span>
+            <span class="section-label">{{ $home['daily']['eyebrow'] }}</span>
             <h2 class="daily-headline">
-                Roti dari<br>
-                <em>Pagi Ini.</em>
+                {{ $dailyTitleLines[0] }}
+                @if (filled($dailyTitleLines[1]))
+                    <br><em>{{ $dailyTitleLines[1] }}</em>
+                @endif
             </h2>
             <p class="daily-desc">
-                Kami memanggang dalam batch kecil. Setiap loaf diperiksa sebelum masuk rak.
-                Kalau sudah habis, tidak ada tambahan hari itu.
+                {{ $home['daily']['description'] }}
             </p>
             <div class="daily-hours">
                 <div class="daily-hours-item">
                     <span class="daily-hours-label">Buka</span>
-                    <span class="daily-hours-value">06.00 WIB</span>
+                    <span class="daily-hours-value">{{ $home['daily']['open_time'] }}</span>
                 </div>
                 <div class="daily-hours-item">
                     <span class="daily-hours-label">Tutup</span>
-                    <span class="daily-hours-value">14.00 WIB</span>
+                    <span class="daily-hours-value">{{ $home['daily']['close_time'] }}</span>
                 </div>
                 <div class="daily-hours-item">
-                    <span class="daily-hours-label">Senin</span>
+                    <span class="daily-hours-label">{{ $home['daily']['closed_day'] }}</span>
                     <span class="daily-hours-value">Libur</span>
                 </div>
             </div>
         </div>
 
         <div class="daily-right">
-            <button class="product-item" id="daily-1" onclick="openModal('sourdough')" aria-label="Lihat detail Sourdough Classic">
-                <span class="product-item-num">01</span>
-                <div class="product-item-info">
-                    <span class="product-item-name">Sourdough Classic</span>
-                    <span class="product-item-sub">Fermentasi 18 jam, krust tebal</span>
-                </div>
-                <span class="product-item-tag tag-amber">Tersedia</span>
-            </button>
-            <button class="product-item" id="daily-2" onclick="openModal('croissant')" aria-label="Lihat detail Croissant Butter">
-                <span class="product-item-num">02</span>
-                <div class="product-item-info">
-                    <span class="product-item-name">Croissant Butter</span>
-                    <span class="product-item-sub">Butter Prancis, 27 lipatan</span>
-                </div>
-                <span class="product-item-tag tag-amber">Tersedia</span>
-            </button>
-            <button class="product-item" id="daily-3" onclick="openModal('rye')" aria-label="Lihat detail Rye Dark">
-                <span class="product-item-num">03</span>
-                <div class="product-item-info">
-                    <span class="product-item-name">Rye Dark</span>
-                    <span class="product-item-sub">Gandum hitam, dense, sedikit asam</span>
-                </div>
-                <span class="product-item-tag tag-amber">Tersedia</span>
-            </button>
-            <button class="product-item" id="daily-4" onclick="openModal('focaccia')" aria-label="Lihat detail Focaccia Rosemary">
-                <span class="product-item-num">04</span>
-                <div class="product-item-info">
-                    <span class="product-item-name">Focaccia Rosemary</span>
-                    <span class="product-item-sub">Minyak zaitun extra virgin, rosemary segar</span>
-                </div>
-                <span class="product-item-tag">Habis Hari Ini</span>
-            </button>
-            <button class="product-item" id="daily-5" onclick="openModal('cinnamon')" aria-label="Lihat detail Cinnamon Roll">
-                <span class="product-item-num">05</span>
-                <div class="product-item-info">
-                    <span class="product-item-name">Cinnamon Roll</span>
-                    <span class="product-item-sub">Kayu manis Cassia, glazur susu</span>
-                </div>
-                <span class="product-item-tag tag-amber">Tersedia</span>
-            </button>
+            @foreach ($home['daily']['products'] as $product)
+                <button class="product-item" id="daily-{{ $loop->iteration }}" data-product="{{ $product['slug'] ?? '' }}" aria-label="Lihat detail {{ $product['name'] ?? '' }}">
+                    <span class="product-item-num">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                    <div class="product-item-info">
+                        <span class="product-item-name">{{ $product['name'] ?? '' }}</span>
+                        <span class="product-item-sub">{{ $product['description'] ?? '' }}</span>
+                    </div>
+                    <span class="product-item-tag {{ str_contains(strtolower($product['status'] ?? ''), 'tersedia') ? 'tag-amber' : '' }}">{{ $product['status'] ?? '' }}</span>
+                </button>
+            @endforeach
         </div>
     </section>
 
     <!-- SECTION: PROSES -->
     <section class="section-process" id="proses" aria-label="Proses pembuatan">
         <div class="process-header">
-            <span class="section-label">Dari Tangan ke Meja Anda</span>
-            <h2 class="section-title">Begini Cara <em>Kami Bekerja</em></h2>
+            <span class="section-label">{{ $home['process']['eyebrow'] }}</span>
+            <h2 class="section-title">{{ $home['process']['title'] }}</h2>
         </div>
         <div class="process-track" id="process-track" role="list" aria-label="Tahap proses pembuatan">
-            <article class="process-card reveal" role="listitem">
-                <span class="process-card-num" aria-hidden="true">01</span>
-                <p class="process-card-time">Pukul 20.00, malam sebelumnya</p>
-                <h3 class="process-card-title">Starter Dibangunkan</h3>
-                <p class="process-card-desc">Levain kami berumur lebih dari dua tahun. Setiap malam ia diberi makan campuran tepung terigu dan gandum hitam sebelum bekerja keesokan harinya.</p>
-            </article>
-            <article class="process-card reveal reveal-delay-1" role="listitem">
-                <span class="process-card-num" aria-hidden="true">02</span>
-                <p class="process-card-time">Pukul 02.00</p>
-                <h3 class="process-card-title">Autolyse dan Mixing</h3>
-                <p class="process-card-desc">Tepung dan air dicampur, dibiarkan istirahat, lalu levain dan garam dimasukkan. Tidak ada mixer mesin untuk adonan sourdough kami.</p>
-            </article>
-            <article class="process-card reveal reveal-delay-2" role="listitem">
-                <span class="process-card-num" aria-hidden="true">03</span>
-                <p class="process-card-time">Pukul 02.00 sampai 05.00</p>
-                <h3 class="process-card-title">Bulk Fermentation</h3>
-                <p class="process-card-desc">Adonan difermentasi tiga jam dalam suhu ruang, dengan stretch-and-fold tiap 30 menit. Di sinilah rasa asam berkembang pelan.</p>
-            </article>
-            <article class="process-card reveal reveal-delay-3" role="listitem">
-                <span class="process-card-num" aria-hidden="true">04</span>
-                <p class="process-card-time">Pukul 05.00</p>
-                <h3 class="process-card-title">Shaping dan Scoring</h3>
-                <p class="process-card-desc">Setiap loaf dibentuk tangan, ditaruh di banneton, lalu diskor dengan lame. Pola skor bukan dekorasi, ia mengontrol arah pengembangan krust.</p>
-            </article>
-            <article class="process-card reveal reveal-delay-4" role="listitem">
-                <span class="process-card-num" aria-hidden="true">05</span>
-                <p class="process-card-time">Pukul 05.30</p>
-                <h3 class="process-card-title">Panggang dan Dinginkan</h3>
-                <p class="process-card-desc">Oven batu pada 240 derajat Celsius dengan uap. Setelah keluar, roti tidak boleh dipotong minimal satu jam. Proses matang berlanjut di dalam krust.</p>
-            </article>
+            @foreach ($home['process']['steps'] as $step)
+                <article class="process-card reveal" role="listitem">
+                    <span class="process-card-num" aria-hidden="true">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                    <p class="process-card-time">{{ $step['time'] ?? '' }}</p>
+                    <h3 class="process-card-title">{{ $step['title'] ?? '' }}</h3>
+                    <p class="process-card-desc">{{ $step['description'] ?? '' }}</p>
+                </article>
+            @endforeach
         </div>
         <p class="process-scroll-hint" aria-label="Geser untuk lanjut">geser untuk lanjut &rsaquo;</p>
     </section>
@@ -157,36 +113,24 @@
         <div class="identity-visual">
             <span class="identity-word" aria-hidden="true">Artisan</span>
             <div class="identity-box">
-                <span class="identity-box-year">2019</span>
+                <span class="identity-box-year">{{ $home['identity']['since_year'] }}</span>
                 <span class="identity-box-label">Berdiri sejak</span>
-                <span class="identity-box-sub">Jakarta Selatan</span>
+                <span class="identity-box-sub">{{ $home['identity']['location'] }}</span>
             </div>
         </div>
         <div class="identity-content">
-            <span class="section-label">Komitmen Kami</span>
-            <h2 class="section-title">Bahan Asli, <em>Proses Jujur.</em></h2>
+            <span class="section-label">{{ $home['identity']['eyebrow'] }}</span>
+            <h2 class="section-title">{{ $home['identity']['title'] }}</h2>
             <ul class="identity-points" aria-label="Nilai-nilai kami">
-                <li class="identity-point reveal">
-                    <div class="identity-point-marker" aria-hidden="true"></div>
-                    <div class="identity-point-text">
-                        <strong>Tepung dari Penggilingan Lokal</strong>
-                        <span>Kami bekerja langsung dengan penggiling di Jawa Tengah yang mengirim setiap dua minggu.</span>
-                    </div>
-                </li>
-                <li class="identity-point reveal reveal-delay-1">
-                    <div class="identity-point-marker" aria-hidden="true"></div>
-                    <div class="identity-point-text">
-                        <strong>Tanpa Pengawet, Tanpa Improver</strong>
-                        <span>Hanya empat bahan: tepung, air, garam, starter. Roti tahan dua hari di suhu ruang jika disimpan benar.</span>
-                    </div>
-                </li>
-                <li class="identity-point reveal reveal-delay-2">
-                    <div class="identity-point-marker" aria-hidden="true"></div>
-                    <div class="identity-point-text">
-                        <strong>Batch Kecil Setiap Hari</strong>
-                        <span>Kami tidak memanggang cadangan. Jumlah yang dipanggang sama dengan yang kami perkirakan terjual hari itu.</span>
-                    </div>
-                </li>
+                @foreach ($home['identity']['points'] as $point)
+                    <li class="identity-point reveal">
+                        <div class="identity-point-marker" aria-hidden="true"></div>
+                        <div class="identity-point-text">
+                            <strong>{{ $point['title'] ?? '' }}</strong>
+                            <span>{{ $point['description'] ?? '' }}</span>
+                        </div>
+                    </li>
+                @endforeach
             </ul>
         </div>
     </section>
@@ -195,111 +139,62 @@
     <section class="section-menu" id="menu" aria-label="Menu unggulan">
         <div class="menu-header">
             <div class="menu-header-left">
-                <span class="section-label">Pilihan Pelanggan</span>
-                <h2 class="section-title">Menu Unggulan</h2>
+                <span class="section-label">{{ $home['featured_menu']['eyebrow'] }}</span>
+                <h2 class="section-title">{{ $home['featured_menu']['title'] }}</h2>
             </div>
-            <a href="#pesan" class="menu-header-link" id="menu-order-link">Pesan Sekarang</a>
+            <a href="{{ $home['featured_menu']['cta_url'] }}" class="menu-header-link" id="menu-order-link">{{ $home['featured_menu']['cta_label'] }}</a>
         </div>
         <div class="menu-grid" role="list" aria-label="Daftar produk unggulan">
-            <article class="menu-card menu-card--large" role="listitem">
-                <div class="menu-card-visual">
-                    <div class="menu-card-visual-bg visual-sourdough"></div>
-                    <span class="menu-card-icon">SD</span>
-                </div>
-                <div class="menu-card-body">
-                    <span class="menu-card-category">Roti Utama</span>
-                    <h3 class="menu-card-name">Sourdough Classic</h3>
-                    <p class="menu-card-desc">Krust gelap, crumb terbuka, rasa asam ringan. Cocok dengan mentega, keju, atau dimakan langsung.</p>
-                </div>
-                <div class="menu-card-footer">
-                    <span class="menu-card-price">Rp 75.000</span>
-                    <button class="menu-card-order" id="order-sourdough" onclick="openModal('sourdough')">Detail</button>
-                </div>
-            </article>
-            <article class="menu-card menu-card--medium" role="listitem">
-                <div class="menu-card-visual">
-                    <div class="menu-card-visual-bg visual-croissant"></div>
-                    <span class="menu-card-icon">CR</span>
-                </div>
-                <div class="menu-card-body">
-                    <span class="menu-card-category">Pastry</span>
-                    <h3 class="menu-card-name">Croissant Butter</h3>
-                    <p class="menu-card-desc">27 lapisan, butter Prancis, renyah di luar lembut di dalam.</p>
-                </div>
-                <div class="menu-card-footer">
-                    <span class="menu-card-price">Rp 35.000</span>
-                    <button class="menu-card-order" id="order-croissant" onclick="openModal('croissant')">Detail</button>
-                </div>
-            </article>
-            <article class="menu-card menu-card--small" role="listitem">
-                <div class="menu-card-visual">
-                    <div class="menu-card-visual-bg visual-rye"></div>
-                    <span class="menu-card-icon">RY</span>
-                </div>
-                <div class="menu-card-body">
-                    <span class="menu-card-category">Whole Grain</span>
-                    <h3 class="menu-card-name">Rye Dark</h3>
-                    <p class="menu-card-desc">Gandum hitam penuh, untuk mereka yang serius soal rasa.</p>
-                </div>
-                <div class="menu-card-footer">
-                    <span class="menu-card-price">Rp 85.000</span>
-                    <button class="menu-card-order" id="order-rye" onclick="openModal('rye')">Detail</button>
-                </div>
-            </article>
-            <article class="menu-card menu-card--wide" role="listitem">
-                <div class="menu-card-visual">
-                    <div class="menu-card-visual-bg visual-focaccia"></div>
-                    <span class="menu-card-icon">FC</span>
-                </div>
-                <div class="menu-card-body">
-                    <span class="menu-card-category">Flatbread</span>
-                    <h3 class="menu-card-name">Focaccia Rosemary</h3>
-                    <p class="menu-card-desc">Direndam minyak zaitun extra virgin semalam. Rosemary segar. Dijual per potong besar.</p>
-                </div>
-                <div class="menu-card-footer">
-                    <span class="menu-card-price">Rp 40.000 / potong</span>
-                    <button class="menu-card-order" id="order-focaccia" onclick="openModal('focaccia')">Detail</button>
-                </div>
-            </article>
-            <article class="menu-card menu-card--slim" role="listitem">
-                <div class="menu-card-visual">
-                    <div class="menu-card-visual-bg visual-cinnamon"></div>
-                    <span class="menu-card-icon">CN</span>
-                </div>
-                <div class="menu-card-body">
-                    <span class="menu-card-category">Pastry Manis</span>
-                    <h3 class="menu-card-name">Cinnamon Roll</h3>
-                    <p class="menu-card-desc">Kayu manis Cassia dari Sumatra, glazur susu tipis. Tidak terlalu manis.</p>
-                </div>
-                <div class="menu-card-footer">
-                    <span class="menu-card-price">Rp 42.000</span>
-                    <button class="menu-card-order" id="order-cinnamon" onclick="openModal('cinnamon')">Detail</button>
-                </div>
-            </article>
+                @foreach ($home['featured_menu']['products'] as $product)
+                    @php($slug = $product['slug'] ?? '')
+                    <article class="menu-card menu-card--{{ $menuCardSizes[$loop->index % count($menuCardSizes)] }}" role="listitem">
+                        <div class="menu-card-visual">
+                            @if (filled($product['image'] ?? null))
+                                <img class="menu-card-image" src="{{ asset('storage/' . $product['image']) }}" alt="{{ $product['name'] ?? '' }}" loading="lazy">
+                            @else
+                                <div class="menu-card-visual-bg visual-{{ \Illuminate\Support\Str::slug($slug) }}"></div>
+                                <span class="menu-card-icon">{{ strtoupper(substr(preg_replace('/[^a-zA-Z0-9]/', '', $product['name'] ?? ''), 0, 2)) }}</span>
+                            @endif
+                        </div>
+                        <div class="menu-card-body">
+                            <span class="menu-card-category">{{ $product['category'] ?? '' }}</span>
+                            <h3 class="menu-card-name">{{ $product['name'] ?? '' }}</h3>
+                            <p class="menu-card-desc">{{ $product['description'] ?? '' }}</p>
+                        </div>
+                        <div class="menu-card-footer">
+                            <span class="menu-card-price">Rp.{{ number_format($product['price'] ?? 0, 0, ',', '.') }}</span>
+                            <button class="menu-card-order" id="order-{{ $slug }}" data-product="{{ $slug }}">Detail</button>
+                        </div>
+                    </article>
+                @endforeach
         </div>
     </section>
 
     <!-- SECTION: PESAN -->
     <section class="section-order" id="pesan" aria-label="Form pemesanan">
         <div class="order-left">
-            <span class="section-label">Pesan Lebih Mudah</span>
-            <h2 class="section-title">Reservasi untuk<br><em>Besok.</em></h2>
+            <span class="section-label">{{ $home['order_section']['eyebrow'] }}</span>
+            <h2 class="section-title">
+                {{ $orderTitleLines[0] }}
+                @if (filled($orderTitleLines[1]))
+                    <br><em>{{ $orderTitleLines[1] }}</em>
+                @endif
+            </h2>
             <p class="order-left-desc">
-                Untuk memastikan roti tersedia, Anda bisa memesan sehari sebelumnya.
-                Pesanan dikonfirmasi via WhatsApp sebelum pukul 21.00 malam.
+                {{ $home['order_section']['description'] }}
             </p>
             <ul class="order-contact-list">
                 <li class="order-contact-item">
                     <span class="order-contact-label">WhatsApp</span>
-                    <span class="order-contact-value"><a href="https://wa.me/6281234567890" target="_blank" rel="noopener" id="wa-link">+62 812-3456-7890</a></span>
+                    <span class="order-contact-value"><a href="https://wa.me/{{ $whatsappNumber }}" target="_blank" rel="noopener" id="wa-link">{{ $home['order_section']['whatsapp'] }}</a></span>
                 </li>
                 <li class="order-contact-item">
                     <span class="order-contact-label">Lokasi</span>
-                    <span class="order-contact-value">Jl. Kemang Raya No. 12, Jakarta Selatan</span>
+                    <span class="order-contact-value">{{ $home['order_section']['address'] }}</span>
                 </li>
                 <li class="order-contact-item">
                     <span class="order-contact-label">Jam Buka</span>
-                    <span class="order-contact-value">Selasa - Minggu, 06.00 - 14.00</span>
+                    <span class="order-contact-value">{{ $home['order_section']['business_hours'] }}</span>
                 </li>
             </ul>
         </div>
@@ -321,11 +216,9 @@
                     <label class="form-label" for="form-product">Produk</label>
                     <select class="form-select" id="form-product" name="product" required>
                         <option value="" disabled selected>Pilih produk</option>
-                        <option value="sourdough">Sourdough Classic (Rp 75.000)</option>
-                        <option value="croissant">Croissant Butter (Rp 35.000)</option>
-                        <option value="rye">Rye Dark (Rp 85.000)</option>
-                        <option value="focaccia">Focaccia Rosemary (Rp 40.000/potong)</option>
-                        <option value="cinnamon">Cinnamon Roll (Rp 42.000)</option>
+                        @foreach ($home['featured_menu']['products'] as $product)
+                            <option value="{{ $product['slug'] ?? '' }}">{{ $product['name'] ?? '' }} ({{ $product['price'] ?? '' }})</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="form-group">
@@ -423,6 +316,16 @@
             }
         };
 
+        @foreach ($home['featured_menu']['products'] as $menuProduct)
+            var menuProductSlug = @js($menuProduct['slug'] ?? '');
+            products[menuProductSlug] = Object.assign({}, products[menuProductSlug] || { details: [] }, {
+                category: @js($menuProduct['category'] ?? ''),
+                name: @js($menuProduct['name'] ?? ''),
+                desc: @js($menuProduct['description'] ?? ''),
+                price: @js($menuProduct['price'] ?? ''),
+            });
+        @endforeach
+
         var modalOverlay = document.getElementById('modal-overlay');
         var modalClose   = document.getElementById('modal-close');
 
@@ -432,7 +335,7 @@
             document.getElementById('modal-product-category').textContent = p.category;
             document.getElementById('modal-product-name').textContent     = p.name;
             document.getElementById('modal-product-desc').textContent     = p.desc;
-            document.getElementById('modal-product-price').textContent    = p.price;
+            document.getElementById('modal-product-price').textContent    = 'Rp ' + p.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
             var detailsEl = document.getElementById('modal-product-details');
             detailsEl.innerHTML = p.details.map(function(d) {
                 return '<div class="modal-detail-item"><p class="modal-detail-label">' + d.label + '</p><p class="modal-detail-value">' + d.value + '</p></div>';
@@ -446,6 +349,12 @@
             modalOverlay.classList.remove('open');
             document.body.style.overflow = '';
         }
+
+        document.querySelectorAll('[data-product]').forEach(function(button) {
+            button.addEventListener('click', function() {
+                openModal(button.dataset.product);
+            });
+        });
 
         modalClose.addEventListener('click', closeModal);
         modalOverlay.addEventListener('click', function(e) {
@@ -499,7 +408,10 @@
             var now    = new Date();
             var label  = days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
             var eyebrow = document.getElementById('hero-eyebrow-date');
-            if (eyebrow) eyebrow.textContent = 'Artisan Bakery, Jakarta \u2014 ' + label;
+            if (eyebrow) {
+                var baseLabel = eyebrow.dataset.baseLabel || eyebrow.textContent;
+                eyebrow.textContent = baseLabel + ' \u2014 ' + label;
+            }
         })();
 </script>
 @endpush

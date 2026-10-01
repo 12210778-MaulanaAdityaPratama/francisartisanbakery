@@ -7,12 +7,18 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     libzip-dev \
     libicu-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    libwebp-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install \
     pdo_pgsql \
     pgsql \
     bcmath \
     zip \
     intl \
+    gd \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

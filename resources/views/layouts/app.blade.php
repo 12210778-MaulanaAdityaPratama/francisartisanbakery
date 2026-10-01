@@ -48,13 +48,13 @@
         }
         /* NAV */
         .nav {
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            right: 0; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             z-index: 100;
-            display: flex; 
-            align-items: center; 
+            display: flex;
+            align-items: center;
             justify-content: space-between;
             padding: 1rem 2rem;
             background: transparent;
@@ -371,6 +371,7 @@
         .menu-card--large .menu-card-visual  { height: 240px; }
         .menu-card--wide .menu-card-visual   { height: 200px; }
         .menu-card-visual-bg { position: absolute; inset: 0; }
+        .menu-card-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
         .visual-sourdough  { background: linear-gradient(135deg, #6B3B1A 0%, #3D2210 100%); }
         .visual-croissant  { background: linear-gradient(135deg, #8B6340 0%, #5C3D20 100%); }
         .visual-rye        { background: linear-gradient(135deg, #4A3520 0%, #2C1E10 100%); }
@@ -512,6 +513,35 @@
             .process-card { flex: 0 0 260px; }
             .modal { padding: 2rem 1.5rem; }
         }
+
+        /* WHATSAPP FLOAT */
+        .wa-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: #25d366;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+        .wa-float:hover {
+            transform: scale(1.1);
+        }
+        .wa-icon {
+            width: 35px;
+            height: 35px;
+            fill: currentColor;
+        }
     </style>
     @stack('styles')
 </head>
@@ -588,5 +618,10 @@
 
     @stack('scripts')
     @include('components.cart-drawer')
+
+    {{-- WHATSAPP FLOAT BUTTON --}}
+    <a href="https://wa.me/6281234567890" class="wa-float" target="_blank" rel="noopener noreferrer" aria-label="Chat WhatsApp">
+        <svg class="wa-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zM223.9 414.7c-32 0-64.4-8.5-92.4-24.6l-6.6-3.9-68.9 18 18.3-67.1-4.3-6.9c-17.6-28.2-26.9-61-26.9-94.6 0-103.5 84.3-187.8 187.9-187.8 50.1 0 97.2 19.5 132.6 55 35.4 35.4 55 82.5 55 132.6 0 103.5-84.3 187.8-187.8 187.8zM326.6 284c-5.6-2.8-33.3-16.4-38.5-18.3-5.2-1.9-9-2.8-12.8 2.8-3.7 5.6-14.6 18.3-17.9 22.1-3.3 3.8-6.6 4.2-12.2 1.4-5.6-2.8-23.7-8.8-45.2-28.1-16.7-15-28-33.5-31.2-39.1-3.3-5.6-.4-8.6 2.4-11.4 2.5-2.5 5.6-6.6 8.4-9.9 2.8-3.3 3.7-5.6 5.6-9.4 1.9-3.8.9-7.1-.5-9.9-1.4-2.8-12.8-30.9-17.5-42.3-4.6-11.2-9.2-9.7-12.8-9.9-3.3-.2-7.1-.2-10.8-.2-3.8 0-9.9 1.4-15 7.1-5.2 5.6-19.8 19.3-19.8 47.1s20.3 54.7 23 58.5c2.8 3.8 40 60.9 96.9 85.5 13.5 5.9 24.1 9.4 32.3 12 13.5 4.3 25.8 3.7 35.6 2.3 11-1.6 33.3-13.6 38-26.7 4.7-13.1 4.7-24.4 3.3-26.7-1.4-2.4-5.2-3.8-10.8-6.6z"/></svg>
+    </a>
 </body>
 </html>
