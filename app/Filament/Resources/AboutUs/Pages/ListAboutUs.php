@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AboutUs\Pages;
 
 use App\Filament\Resources\AboutUs\AboutUsResource;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListAboutUs extends ListRecords
@@ -11,8 +12,12 @@ class ListAboutUs extends ListRecords
 
     protected function getHeaderActions(): array
     {
+        if (! AboutUsResource::canCreate()) {
+            return [];
+        }
+
         return [
-            \Filament\Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

@@ -17,11 +17,11 @@ class AboutUsResource extends Resource
 {
     protected static ?string $model = AboutUs::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedInformationCircle;
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedInformationCircle;
 
     protected static ?string $navigationLabel = 'Tentang Kami';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Konten';
+    protected static string|\UnitEnum|null $navigationGroup = 'Konten';
 
     protected static ?int $navigationSort = 1;
 
@@ -35,6 +35,11 @@ class AboutUsResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return 'tentang kami';
+    }
+
+    public static function canCreate(): bool
+    {
+        return parent::canCreate() && ! AboutUs::query()->exists();
     }
 
     public static function form(Schema $schema): Schema

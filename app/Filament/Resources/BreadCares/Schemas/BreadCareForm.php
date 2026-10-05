@@ -83,7 +83,6 @@ class BreadCareForm
                                     ->required()
                                     ->rows(2),
                             ])
-                            ->simple()
                             ->reorderable()
                             ->collapsible()
                             ->itemLabel(fn (array $state): ?string => $state['title'] ?? substr($state['content'] ?? '', 0, 50).'...')
@@ -104,7 +103,7 @@ class BreadCareForm
                             ->maxSize(10240)
                             ->imageEditor()
                             ->saveUploadedFileUsing(function (FileUpload $component, TemporaryUploadedFile $file): string {
-                                return (new WebpImageOptimizer())->store($file->getRealPath(), 'bread-care');
+                                return (new WebpImageOptimizer)->store($file->getRealPath(), 'bread-care');
                             })
                             ->columnSpanFull(),
                     ]),

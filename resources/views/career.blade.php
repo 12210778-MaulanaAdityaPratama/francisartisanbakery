@@ -33,7 +33,7 @@
         margin: 0 auto;
         padding: 5rem 2rem;
     }
-    
+
     .job-card {
         background: var(--white);
         border: 1px solid var(--cream-dark);
@@ -99,20 +99,15 @@
 </header>
 
 <section class="career-content">
-    
-    <div class="job-card">
-        <h2 class="job-title">Baker Artisan</h2>
-        <div class="job-meta">Full Time • Jakarta</div>
-        <p class="job-desc">Kami mencari baker yang bersemangat dan berpengalaman dalam pembuatan roti artisan (sourdough, croissant, dsb). Anda akan bertanggung jawab mulai dari persiapan bahan, proses fermentasi, hingga pemanggangan.</p>
-        <a href="mailto:hrd@francisartisanbakery.com?subject=Lamaran%20Baker%20Artisan" class="job-apply">Kirim Lamaran</a>
-    </div>
-
-    <div class="job-card">
-        <h2 class="job-title">Store Assistant / Kasir</h2>
-        <div class="job-meta">Full Time / Part Time • Jakarta</div>
-        <p class="job-desc">Membantu melayani pelanggan dengan ramah, menjelaskan varian produk, mengatur display roti, dan menangani transaksi. Dibutuhkan kemampuan komunikasi yang baik dan teliti.</p>
-        <a href="mailto:hrd@francisartisanbakery.com?subject=Lamaran%20Store%20Assistant" class="job-apply">Kirim Lamaran</a>
-    </div>
-
+    @forelse ($careers as $career)
+        <div class="job-card">
+            <h2 class="job-title">{{ $career->title }}</h2>
+            <div class="job-meta">{{ $career->employment_type }} &bull; {{ $career->location }}</div>
+            <p class="job-desc">{{ $career->description }}</p>
+            <a href="mailto:{{ $career->application_email }}?subject={{ rawurlencode('Lamaran ' . $career->title) }}" class="job-apply">Kirim Lamaran</a>
+        </div>
+    @empty
+        <p class="no-jobs">Saat ini belum ada lowongan yang tersedia.</p>
+    @endforelse
 </section>
 @endsection

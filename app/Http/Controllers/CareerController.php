@@ -2,12 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Career;
+use Illuminate\Contracts\View\View;
 
 class CareerController extends Controller
 {
-    public function index()
+    public function index(): View
     {
-        return view('career');
+        $careers = Career::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('title')
+            ->get();
+
+        return view('career', compact('careers'));
     }
 }

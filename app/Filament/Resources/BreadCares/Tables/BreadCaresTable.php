@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\BreadCares\Tables;
 
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -22,8 +22,7 @@ class BreadCaresTable
                 ImageColumn::make('image')
                     ->label('Foto')
                     ->size(60)
-                    ->disk('public')
-                    ->defaultImageUrl(url('/images/placeholder.png')),
+                    ->disk('public'),
                 TextColumn::make('title')
                     ->label('Judul')
                     ->searchable()
@@ -89,11 +88,11 @@ class BreadCaresTable
                     ->trueLabel('Aktif')
                     ->falseLabel('Tidak Aktif'),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
